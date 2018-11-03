@@ -90,6 +90,7 @@ def synloop(obj, connection, consumer, blueprint, hub, qos,
     """Fallback blocking event loop for transports that doesn't support AIO."""
 
     on_task_received = obj.create_task_handler()
+    perform_pending_operations = obj.perform_pending_operations
     consumer.register_callback(on_task_received)
     consumer.consume()
 
@@ -100,6 +101,7 @@ def synloop(obj, connection, consumer, blueprint, hub, qos,
         if qos.prev != qos.value:
             qos.update()
         try:
+            perform_pending_operations()
             connection.drain_events(timeout=2.0)
         except socket.timeout:
             pass
